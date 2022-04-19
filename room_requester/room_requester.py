@@ -1,14 +1,6 @@
-import requests
-import re
 from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 
-from entry_handler import get_new_entries
-
-""" driver = webdriver.Chrome()
-driver.get("https://www.google.de")
-driver.close() """
+from entry_handler.entry_handler import get_new_entries
 
 
 def get_current_time():

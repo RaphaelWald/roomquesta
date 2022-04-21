@@ -1,3 +1,5 @@
+import sqlite3
+
 from datetime import datetime
 
 from entry_handler.entry_handler import get_new_entries

@@ -6,6 +6,7 @@ import pyppeteer
 xpath_move_in = '//*[@id="content"]/div[5]/div[2]/p[1]'
 xpath_unlimited = '//*[@id="content"]/div[5]/div[2]/p[2]'
 xpath_price = '//*[@id="content"]/div[5]/div[2]/p[3]'
+xpath_region = '//*[@id="content"]/div[5]/div[3]/p[1]'
 xpath_address = '//*[@id="content"]/div[5]/div[3]/p[2]'
 xpath_location = '//*[@id="content"]/div[5]/div[3]/p[3]'
 
@@ -14,20 +15,30 @@ class Entry:
     def __init__(self, url):
         page = requests.get(url)
         tree = html.fromstring(page.content)
+        address_content = tree.xpath(xpath_address)[0].text_content()[9:]
         self.url = url
         self.move_in = tree.xpath(xpath_move_in)[0].text_content()[8:]
-        self.unlimited = bool(tree.xpath(xpath_unlimited)[
-                              0].text_content()[4:] == "Unbefristet")
+        self.move_out = tree.xpath(xpath_unlimited)[
+            0].text_content()[4:]
+        self.unlimited = bool(self.move_out == "Unbefristet")
         self.price = int(re.findall(
             "\d+", tree.xpath(xpath_price)[0].text_content())[0])
-        self.street = self.get_street(tree.xpath(xpath_address)
-                                      [0].text_content()[9:])
-        self.house_number = self.get_house_number(
-            tree.xpath(xpath_address)[0].text_content())
+        self.region = tree.xpath(xpath_region)[0].text_content()[8:]
+        self.house_number = self.get_house_number(address_content)
+        self.street = self.get_street(
+            address_content) if self.house_number else address_content
         self.postal_code = int(re.findall(
             "\d+", tree.xpath(xpath_location)[0].text_content())[0])
         self.location = self.get_location(
             tree.xpath(xpath_location)[0].text_content())
+
+    def get_move_out(self, content):
+        if content == "Unbefristet":
+            return content
+        else:
+            # TODO
+            # Turn written text into move_out-date
+            return content
 
     def get_house_number(self, content):
         number = re.findall("\d+", content)
@@ -55,6 +66,7 @@ class Entry:
         print(f"Move_in: {self.move_in}")
         print(f"Unlimited: {self.unlimited}")
         print(f"Price: {self.price}")
+        print(f"Region: {self.region}")
         print(f"Location: {self.location}")
         print(f"Postal Code: {self.postal_code}")
         print(f"Street: {self.street}")

@@ -39,9 +39,12 @@ def _read_entry_url_list() -> list[str]:
 def _get_current_entry_url_list() -> list[str]:
     response = requests.post('https://www.wgzimmer.ch/wgzimmer/search/mate.html?',
                              headers=HEADERS, cookies=COOKIES, data=DATA)
+    return _find_all_entry_urls_in_html(response.text)
 
+
+def _find_all_entry_urls_in_html(html_content) -> list[str]:
     entry_url_regex = "/de/wgzimmer/search/mate/ch/\S+.html"
-    entry_url_list = re.findall(entry_url_regex, response.text)
+    entry_url_list = re.findall(entry_url_regex, html_content)
     return [f"https://www.wgzimmer.ch{entry_url}" for entry_url in entry_url_list]
 
 

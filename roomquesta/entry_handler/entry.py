@@ -3,7 +3,7 @@
 import requests
 import re
 from lxml import html
-from user import User
+from roomquesta.entry_handler import user
 
 MOVE_IN_XPATH = '//*[@id="content"]/div[5]/div[2]/p[1]'
 UNLIMITED_XPATH = '//*[@id="content"]/div[5]/div[2]/p[2]'
@@ -83,11 +83,11 @@ class Entry:
             for user in matching_users:
                 self._send_request_from_user(user)
 
-    def _get_matching_users(self) -> list[User]:
+    def _get_matching_users(self) -> list[user.User]:
         """Returns list of users whose criteria matches the properties of this entry"""
         return []
 
-    def _send_request_from_user(self, user: User) -> bool:
+    def _send_request_from_user(self, user: user.User) -> bool:
         """Tries to send request from specified user and returns whether sending was successful."""
         print(f"{user.name} sent request to entry: {self.url}")
         return True

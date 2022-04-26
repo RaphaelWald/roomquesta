@@ -23,6 +23,7 @@ html5lib==1.1
 idna==3.3
 importlab==0.7
 importlib-metadata==4.8.1
+iniconfig==1.1.1
 itsdangerous==2.1.2
 Jinja2==3.0.3
 jsonschema==3.2.0
@@ -42,10 +43,12 @@ orjson @ file:///build/python-orjson/src/orjson-3.6.7/target/wheels/orjson-3.6.7
 packaging==20.9
 pep517==0.12.0
 platformdirs==2.5.2
+pluggy==1.0.0
 ply==3.11
 progress==1.6
 protobuf==3.19.4
 psutil==5.9.0
+py==1.11.0
 PyAudio==0.2.11
 pycairo==1.21.0
 pycodestyle==2.8.0
@@ -58,6 +61,7 @@ PyQt5-sip==12.9.1
 PyQtWebEngine==5.15.5
 pyrsistent==0.18.1
 PySocks==1.7.1
+pytest==7.1.2
 pytype==2022.4.22
 PyYAML==6.0
 requests==2.27.1

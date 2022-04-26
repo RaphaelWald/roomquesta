@@ -1,7 +1,7 @@
 """Main module that runs the application."""
 
-from entry_handler import entry_fetcher
-from entry_handler import entry
+from roomquesta.entry_handler import entry_fetcher
+from roomquesta.entry_handler import entry
 
 while True:
     new_entry_urls = entry_fetcher.get_new_entry_urls()

@@ -7,7 +7,7 @@
 import requests
 import re
 import sqlite3
-from entry_request import COOKIES, HEADERS, DATA
+from roomquesta.entry_handler.entry_request import COOKIES, HEADERS, DATA
 
 
 def get_new_entry_urls() -> list[str]:
@@ -26,7 +26,7 @@ def get_new_entry_urls() -> list[str]:
 
 
 def _read_entry_url_list() -> list[str]:
-    con = sqlite3.connect('databases/entry.db')
+    con = sqlite3.connect('entry.db')
     c = con.cursor()
     c.execute("SELECT * FROM links")
     entry_list = c.fetchall()
@@ -50,10 +50,10 @@ def _find_new_entry_urls(new_list: list[str], old_list: list[str]) -> list[str]:
 
 
 def _save_entry_url_list(entry_urls: list[str]) -> None:
-    con = sqlite3.connect('databases/entry.db')
+    con = sqlite3.connect('entry.db')
     c = con.cursor()
     c.execute("DROP TABLE IF EXISTS links")
-    c.execute("CREATE TABLE links (Link text not null)")
+    c.execute("CREATE TABLE links (link text not null)")
     for entry_url in entry_urls:
         c.execute(f"INSERT INTO links VALUES ('{entry_url}')")
     con.commit()

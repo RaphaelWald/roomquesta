@@ -1,4 +1,6 @@
-cookies = {
+"""This module defines the specific COOKIES, HEADERS and DATA to fetch the entry page from wgzimmer.ch"""
+
+COOKIES = {
     'adnzVisitorId': '3478750464785655052',
     'adnzVisitorId': '3478750464785655052',
     'wc_language': 'de',
@@ -15,7 +17,7 @@ cookies = {
     'bclk': '6752371182556125',
 }
 
-headers = {
+HEADERS = {
     'authority': 'www.wgzimmer.ch',
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     'accept-language': 'en-US,en;q=0.9',
@@ -35,7 +37,7 @@ headers = {
     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36',
 }
 
-data = {
+DATA = {
     'query': '',
     'priceMin': '200',
     'priceMax': '1500',

@@ -1,12 +1,12 @@
-from entry_handler.entry_fetcher import get_new_entries
-from entry_handler.entry import Entry
+"""Main module that runs the application."""
+
+from entry_handler import entry_fetcher
+from entry_handler import entry
 
 while True:
-    new_entries = get_new_entries()
-    if new_entries:
-        for url in new_entries:
-            # get attributes of entry
-            # find matching users in database
-            # send request from every matching user
-            entry = Entry(url)
-            entry.print_entry()
+    new_entry_urls = entry_fetcher.get_new_entry_urls()
+    if new_entry_urls:
+        for new_entry_url in new_entry_urls:
+            new_entry = entry.Entry(new_entry_url)
+            new_entry.send_requests()
+            new_entry.print_entry()

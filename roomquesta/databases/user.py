@@ -4,4 +4,10 @@ con = sqlite3.connect('user.db')
 
 c = con.cursor()
 
-c.execute("CREATE TABLE users VALUES")
+# Create Table
+c.execute('''CREATE TABLE IF NOT EXISTS users (
+            rollno real, 
+            name text,
+            email text,
+            
+        )''')

@@ -1,67 +1,72 @@
+"""This module defines the Entry-Class, that handles new entry-url by extracting important data."""
+
 import requests
 import re
 from lxml import html
-import pyppeteer
+from typing import List, boolean, string
+from user import User
 
-xpath_move_in = '//*[@id="content"]/div[5]/div[2]/p[1]'
-xpath_unlimited = '//*[@id="content"]/div[5]/div[2]/p[2]'
-xpath_price = '//*[@id="content"]/div[5]/div[2]/p[3]'
-xpath_region = '//*[@id="content"]/div[5]/div[3]/p[1]'
-xpath_address = '//*[@id="content"]/div[5]/div[3]/p[2]'
-xpath_location = '//*[@id="content"]/div[5]/div[3]/p[3]'
+MOVE_IN_XPATH = '//*[@id="content"]/div[5]/div[2]/p[1]'
+UNLIMITED_XPATH = '//*[@id="content"]/div[5]/div[2]/p[2]'
+PRICE_XPATH = '//*[@id="content"]/div[5]/div[2]/p[3]'
+REGION_XPATH = '//*[@id="content"]/div[5]/div[3]/p[1]'
+ADDRESS_XPATH = '//*[@id="content"]/div[5]/div[3]/p[2]'
+LOCATION_XPATH = '//*[@id="content"]/div[5]/div[3]/p[3]'
 
 
 class Entry:
+    """Stores entry properties and sends requests from matching users.
+
+    This class has two main functions:
+        1. Page Content
+            - request page content
+            - extract important information based on page content
+            - store information in properties
+        2. Request sending
+            - Find matching users
+            - Send requests to entry from all matching users
+
+    Attributes:
+        url: URL of the entry.
+        page: Response to GET-Request for 'url'.
+        tree: HTML tree based on the page content.
+        move_in: Earliest move-in date.
+        move_out: Move-out date if not unlimited.
+        unlimited: True if there is no move_out date.
+        price: Monthly rental fee in CHF.
+        region: Closer environment.
+        house_number:
+        postal_code:
+        location: City to corresponding postal_code
+
+    Public methods:
+        update: Reinitializes entry properties after requesting current page content.
+        print_entry: Prints out all entry properties in human readable format.
+        send_request_from_all_matching_users: Finds all matching users and sends requests for them.
+    """
+
     def __init__(self, url):
-        page = requests.get(url)
-        tree = html.fromstring(page.content)
-        address_content = tree.xpath(xpath_address)[0].text_content()[9:]
-        self.url = url
-        self.move_in = tree.xpath(xpath_move_in)[0].text_content()[8:]
-        self.move_out = tree.xpath(xpath_unlimited)[
-            0].text_content()[4:]
-        self.unlimited = bool(self.move_out == "Unbefristet")
-        self.price = int(re.findall(
-            "\d+", tree.xpath(xpath_price)[0].text_content())[0])
-        self.region = tree.xpath(xpath_region)[0].text_content()[8:]
-        self.house_number = self.get_house_number(address_content)
-        self.street = self.get_street(
-            address_content) if self.house_number else address_content
-        self.postal_code = int(re.findall(
-            "\d+", tree.xpath(xpath_location)[0].text_content())[0])
-        self.location = self.get_location(
-            tree.xpath(xpath_location)[0].text_content())
+        """Initializes the attributes based on the received page content."""
+        self.url: string = url
+        self.page: requests.models.Response = requests.get(url)
+        self.tree: html.HtmlElement = html.fromstring(self.page.content)
+        self.move_in: string = self._get_move_in()
+        self.move_out: string = self._get_move_out()
+        self.unlimited: string = bool(self.move_out == "Unbefristet")
+        self.price: int = self._get_price()
+        self.region = self._get_region()
+        self.house_number: int = self._get_house_number()
+        self.street: string = self._get_street()
+        self.postal_code: int = self._get_postal_code()
+        self.location: string = self._get_location(
+        )
 
-    def get_move_out(self, content):
-        if content == "Unbefristet":
-            return content
-        else:
-            # TODO
-            # Turn written text into move_out-date
-            return content
-
-    def get_house_number(self, content):
-        number = re.findall("\d+", content)
-        if len(number) > 0:
-            return int(number[0])
-        else:
-            return False
-
-    def get_street(self, content):
-        street = re.findall(".+?\d", content)
-        if len(street) > 0:
-            return street[0][:-2]
-        else:
-            return ""
-
-    def get_location(self, content):
-        location = re.findall("\d (.*)", content)
-        if len(location) > 0:
-            return location[0]
-        else:
-            return ""
+    def update(self):
+        """Requests page content and reinitializes entry properties."""
+        self.__init__(self, self.url)
 
     def print_entry(self):
+        """Prints all properties of Entry-instance."""
         print(f"URL: {self.url}")
         print(f"Move_in: {self.move_in}")
         print(f"Unlimited: {self.unlimited}")
@@ -72,14 +77,75 @@ class Entry:
         print(f"Street: {self.street}")
         print(f"House_number: {self.house_number}")
 
-    def get_matching_users(self):
-        return []
-
-    def send_request_from_user(self, user):
-        print(f"{user.name} sent request to entry: {self.url}")
-
-    def send_request_from_all_matching_profiles(self):
-        matching_users = self.get_matching_profiles()
+    def send_request_from_all_matching_users(self) -> boolean:
+        """Gets all matching users and tries to sent a request from each of them."""
+        matching_users = self._get_matching_users()
         if matching_users:
             for user in matching_users:
-                self.send_request_from_user(user)
+                self._send_request_from_user(user)
+
+    def _get_matching_users(self) -> List[User]:
+        """Returns list of users whose criteria matches the properties of this entry"""
+        return []
+
+    def _send_request_from_user(self, user: User) -> boolean:
+        """Tries to send request from specified user and returns whether sending was successful."""
+        print(f"{user.name} sent request to entry: {self.url}")
+        return True
+
+    def _get_move_in(self) -> string:
+        html_element = self.tree.xpath(MOVE_IN_XPATH)[0]
+        content = html_element.text_content()
+        move_in_date = content[8:]
+        return move_in_date
+
+    def _get_move_out(self) -> string:
+        html_element = self.tree.xpath(UNLIMITED_XPATH)[0]
+        content = html_element.text_content()
+        move_out_date = content[4:]
+        return move_out_date
+
+    def _get_price(self) -> string:
+        html_element = self.tree.xpath(PRICE_XPATH)[0]
+        content = html_element.text_content()
+        price = re.findall("\d+", content)[0]
+        return int(price)
+
+    def _get_region(self) -> string:
+        html_element = self.tree.xpath(REGION_XPATH)[0]
+        content = html_element.text_content()
+        region = content[8:]
+        return region
+
+    def _get_house_number(self) -> string:
+        html_element = self.tree.xpath(ADDRESS_XPATH)[0]
+        content = html_element.text_content()[9:]
+        number = re.findall("\d+", content)
+        if number:
+            return int(number[0])
+        else:
+            return False
+
+    def _get_street(self) -> string:
+        html_element = self.tree.xpath(ADDRESS_XPATH)[0]
+        content = html_element.text_content()[9:]
+        street = re.findall(".+?\d", content)
+        if street:
+            return street[0][:-2]
+        else:
+            return ""
+
+    def _get_postal_code(self) -> string:
+        html_element = self.tree.xpath(LOCATION_XPATH)[0]
+        content = html_element.text_content()
+        postal_code = re.findall("\d+", content)[0]
+        return int(postal_code)
+
+    def _get_location(self) -> string:
+        html_element = self.tree.xpath(LOCATION_XPATH)[0]
+        content = html_element.text_content()
+        location = re.findall("\d (.*)", content)
+        if location:
+            return location[0]
+        else:
+            return ""
